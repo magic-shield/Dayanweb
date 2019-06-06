@@ -14,7 +14,8 @@ db = SQLAlchemy()
 def set_log(config_name):
     """Create different logs based on different environments"""
     logging.basicConfig(level=config[config_name].LOG_LEVEL)
-    file_log_handler = RotatingFileHandler("/home/python/Desktop/Dayanweb/logs/log", maxBytes=1024 * 1024 * 100, backupCount=10)
+    file_log_handler = RotatingFileHandler("/home/python/Desktop/Dayanweb/logs/log", maxBytes=1024 * 1024 * 100,
+                                           backupCount=10)
     formatter = logging.Formatter('%(levelname)s %(filename)s:%(lineno)d %(message)s')
     file_log_handler.setFormatter(formatter)
     logging.getLogger().addHandler(file_log_handler)
@@ -44,5 +45,9 @@ def create_app(config_name):
 
     # Integrated flask-session
     Session(app)
+
+    # Register blueprint
+    from info.modules.index import index_blu
+    app.register_blueprint(index_blu)
 
     return app
