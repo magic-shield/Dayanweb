@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
 from flask_wtf import CSRFProtect
+from flask_session import Session
 
 app = Flask(__name__)
 
@@ -15,6 +16,12 @@ class Config(object):
     REDIS_HOST = "127.0.0.1"
     REDIS_PORT = 6379
 
+    SESSION_TYPE = "redis"
+    SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+    SESSION_USE_SIGNER = True
+    SESSION_PERMANENT = False
+    PERMANENT_SESSION_LIFETIME = 86400 * 2
+
 
 app.config.from_object(Config)
 
@@ -26,6 +33,9 @@ redis_store = StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT)
 
 # Integrated CSRFProtect
 CSRFProtect(app)
+
+# Integrated flask-session
+Session(app)
 
 
 @app.route('/')
