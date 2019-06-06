@@ -21,6 +21,7 @@ def set_log(config_name):
     logging.getLogger().addHandler(file_log_handler)
 
 
+redis_store = None  # type: StrictRedis
 def create_app(config_name):
     """
     Create different app based on different environments
@@ -37,6 +38,7 @@ def create_app(config_name):
     # Integrated SQLAlchemy to Flask
     db.init_app(app)
 
+    global redis_store
     # Integrated redis
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
 
