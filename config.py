@@ -15,3 +15,22 @@ class Config(object):
     SESSION_USE_SIGNER = True
     SESSION_PERMANENT = False
     PERMANENT_SESSION_LIFETIME = 5
+
+
+class DevelopConfig(Config):
+    DEBUG = True
+
+
+class ProductConfig(Config):
+    DEBUG = False
+
+
+class TestingConfig(Config):
+    DEBUG = True
+
+
+config = {
+    "develop": DevelopConfig,
+    "product": ProductConfig,
+    "testing": TestingConfig
+}
