@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
 from flask_wtf import CSRFProtect
 from flask_session import Session
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
 
 app = Flask(__name__)
 
@@ -20,7 +22,7 @@ class Config(object):
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
     SESSION_USE_SIGNER = True
     SESSION_PERMANENT = False
-    PERMANENT_SESSION_LIFETIME = 86400 * 2
+    PERMANENT_SESSION_LIFETIME = 5
 
 
 app.config.from_object(Config)
@@ -36,6 +38,13 @@ CSRFProtect(app)
 
 # Integrated flask-session
 Session(app)
+
+# Integrated flask-script
+manager = Manager(app)
+
+# Integrated flask-migrate
+Migrate(app, db)
+manager.add_command("db", MigrateCommand)
 
 
 @app.route('/')
