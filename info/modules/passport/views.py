@@ -7,28 +7,35 @@ from info.utils.captcha.captcha import captcha
 
 @passport_blu.route("/image_code")
 def get_image_code():
-    """
-    获取参数(随机的字符串)
-    校验参数是否存在
-    生成验证码 captcha
-    随机字符串和生成的文本验证码以k,v的形式保存到redis中
-    把图片验证码返回给浏览器
-    :return:
-    """
-
+    # Get parameters
     image_code_id = request.args.get("imageCodeId")
 
+    # Check if the parameter exists
     if not image_code_id:
         abort(404)
 
+    # Generate captcha
     _, text, image = captcha.generate_captcha()
 
+    # Save to redis
     try:
         redis_store.setex("ImageCodeID_" + image_code_id, constants.IMAGE_CODE_REDIS_EXPIRES, text)
     except Exception as e:
         current_app.logger.error(e)
         abort(500)
 
+    # Return image and change the response header
     response = make_response(image)
     response.headers["Content-Type"] = "image/jpg"
     return response
+
+
+@passport_blu.route("/sms_code", methods=["POST"])
+def get_sms_code():
+    # get param: mobile, image_code, image_code_id
+    # global check
+    # Verify mobile
+    # Verify if the picture captcha expires
+    # Verify that the verification code entered by the user is the same as the verification code queried through the image_code_id
+
+    pass
