@@ -16,7 +16,7 @@ class Config(object):
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
     SESSION_USE_SIGNER = True
     SESSION_PERMANENT = False
-    PERMANENT_SESSION_LIFETIME = 5
+    PERMANENT_SESSION_LIFETIME = 86400 * 2
 
 
 class DevelopConfig(Config):
