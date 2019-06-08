@@ -1,4 +1,4 @@
-from flask import render_template, current_app, redirect
+from flask import render_template, current_app
 
 from info.modules.index import index_blu
 
@@ -10,4 +10,4 @@ def index():
 
 @index_blu.route("/favicon.ico")
 def favicon():
-    return redirect("static/news/favicon.ico")
+    return current_app.send_static_file("news/favicon.ico")
