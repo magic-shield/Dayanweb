@@ -8,6 +8,8 @@ from redis import StrictRedis
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_session import Session
 
+from info.utils.common import do_index_class
+
 db = SQLAlchemy()
 
 
@@ -58,6 +60,9 @@ def create_app(config_name):
 
     # Integrated flask-session
     Session(app)
+
+    # add filter
+    app.add_template_filter(do_index_class, "index_class")
 
     # Register blueprint
     from info.modules.index import index_blu
