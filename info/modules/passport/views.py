@@ -106,32 +106,32 @@ def get_sms_code():
 @passport_blu.route("/register", methods=["POST"])
 def register():
     """
-    1.接收参数 mobile smscode password
-    2.整体校验参数
-    3.手机号格式是否正确
-    4.从redis中通过手机号取出真实的短信验证码
-    5.和用户输入的验证码进行校验
-    6.初始化user对象,添加数据
-    7.session保持用户登录状态
-    8.返回响应
+    1.get params mobile smscode password
+    2.global check
+    3.Verify mobile
+    4.Get a real SMS verification code from Redis via your phone number
+    5.Check with the verification code entered by the user
+    6.Initialize the user object and add data
+    7.Use session to maintain user logon status
+    8.return response
     :return:
     """
 
-    # 1.接收参数 mobile smscode password
+    # 1.get params mobile smscode password
     dict_data = request.json
     mobile = dict_data.get("mobile")
     smscode = dict_data.get("smscode")
     password = dict_data.get("password")
 
-    # 2.整体校验参数
+    # 2.global check
     if not all([mobile, smscode, password]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数不足")
 
-    # 3.手机号格式是否正确
+    # 3.Verify mobile
     if not re.match(r"1[35678]\d{9}", mobile):
         return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
 
-    # 4.从redis中通过手机号取出真实的短信验证码
+    # 4.Get a real SMS verification code from Redis via your phone number
     try:
         real_sms_code = redis_store.get("SMS_" + mobile)
     except Exception as e:
@@ -141,11 +141,11 @@ def register():
     if not real_sms_code:
         return jsonify(errno=RET.DATAERR, errmsg="图片验证码已经过期")
 
-    # 5.和用户输入的验证码进行校验
+    # 5.Check with the verification code entered by the user
     if smscode != real_sms_code:
         return jsonify(errno=RET.DATAERR, errmsg="验证码输入错误")
 
-    # 6.初始化user对象,添加数据
+    # 6.Initialize the user object and add data
     user = User()
     user.nick_name = mobile
     user.password_hash = password
@@ -159,10 +159,10 @@ def register():
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
 
-    # 7.session保持用户登录状态
+    # 7.Use session to maintain user logon status
     session["user_id"] = user.id
 
-    # 8.返回响应
+    # 8.return response
     return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
