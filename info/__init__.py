@@ -5,7 +5,7 @@ from flask import Flask
 from config import config
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
-from flask_wtf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_session import Session
 
 db = SQLAlchemy()
@@ -45,7 +45,16 @@ def create_app(config_name):
                               decode_responses=True)
 
     # Integrated CSRFProtect
-    # CSRFProtect(app)
+    # 1.add csrf_token to Cookie
+    # 2.add csrf token to Ajax
+    @app.after_request
+    def after_request(response):
+        # Generate token values with WTF extensions
+        csrf_token = generate_csrf()
+        response.set_cookie("csrf_token", csrf_token)
+        return response
+
+    CSRFProtect(app)
 
     # Integrated flask-session
     Session(app)
