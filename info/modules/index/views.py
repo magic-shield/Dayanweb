@@ -1,7 +1,7 @@
 from flask import render_template, current_app, session
 
 from info import constants
-from info.models import User, News
+from info.models import User, News, Category
 from info.modules.index import index_blu
 
 
@@ -16,7 +16,7 @@ def index():
         except Exception as e:
             current_app.logger(e)
 
-    # 显示新闻点击排行
+    # --显示新闻点击排行--
     clicks_news = list()
     try:
         # 以点击量降序取出新闻, 结果是对象列表
@@ -27,9 +27,19 @@ def index():
     # 转化为字典列表
     clicks_news_li = [news.to_basic_dict() for news in clicks_news]
 
+    # --显示新闻分类--
+    categorys = list()
+    try:
+        categorys = Category.query.all()
+    except Exception as e:
+        current_app.logger.error(e)
+
+    categorys_li = [category.to_dict() for category in categorys]
+
     data = {
         "user_info": user.to_dict() if user else None,
-        "clicks_news_li": clicks_news_li
+        "clicks_news_li": clicks_news_li,
+        "categorys": categorys_li
     }
 
     return render_template("news/index.html", data=data)
