@@ -229,7 +229,7 @@ function sendSMSCode() {
                 // 弹出错误信息
                 alert(response.errmsg);
                 // 更改错误提示内容,并显示
-                $("#register-sms-code-err").html(response.errmsg).show();
+                $("#register-image-code-err").html(response.errmsg).show();
                 // 恢复点击事件
                 $(".get_code").attr("onclick", "sendSMSCode();");
 
