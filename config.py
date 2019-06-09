@@ -6,6 +6,7 @@ from redis import StrictRedis
 class Config(object):
     """Integrated configuration Classes"""
     DEBUG = True
+    SECRET_KEY = "123456789"
     SQLALCHEMY_DATABASE_URI = "mysql://root:mysql@127.0.0.1:3306/dayanweb"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
