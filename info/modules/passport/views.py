@@ -1,10 +1,11 @@
 import random
 import re
 
-from flask import abort, current_app, make_response, request, jsonify
+from flask import abort, current_app, make_response, request, jsonify, session
 
-from info import redis_store, constants
+from info import redis_store, constants, db
 from info.libs.yuntongxun.sms import CCP
+from info.models import User
 from info.modules.passport import passport_blu
 from info.utils.captcha.captcha import captcha
 from info.utils.response_code import RET
@@ -100,3 +101,72 @@ def get_sms_code():
 
     # Return response
     return jsonify(errno=RET.OK, errmsg="成功发送短信验证码")
+
+
+@passport_blu.route("/register", methods=["POST"])
+def register():
+    """
+    1.接收参数 mobile smscode password
+    2.整体校验参数
+    3.手机号格式是否正确
+    4.从redis中通过手机号取出真实的短信验证码
+    5.和用户输入的验证码进行校验
+    6.初始化user对象,添加数据
+    7.session保持用户登录状态
+    8.返回响应
+    :return:
+    """
+
+    # 1.接收参数 mobile smscode password
+    dict_data = request.json
+    mobile = dict_data.get("mobile")
+    smscode = dict_data.get("smscode")
+    password = dict_data.get("password")
+
+    # 2.整体校验参数
+    if not all([mobile, smscode, password]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不足")
+
+    # 3.手机号格式是否正确
+    if not re.match(r"1[35678]\d{9}", mobile):
+        return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
+
+    # 4.从redis中通过手机号取出真实的短信验证码
+    try:
+        real_sms_code = redis_store.get("SMS_" + mobile)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+
+    if not real_sms_code:
+        return jsonify(errno=RET.DATAERR, errmsg="图片验证码已经过期")
+
+    # 5.和用户输入的验证码进行校验
+    if smscode != real_sms_code:
+        return jsonify(errno=RET.DATAERR, errmsg="验证码输入错误")
+
+    # 6.初始化user对象,添加数据
+    user = User()
+    user.nick_name = mobile
+    user.password_hash = password
+    user.mobile = mobile
+
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
+
+    # 7.session保持用户登录状态
+    session["user_id"] = user.id
+
+    # 8.返回响应
+    return jsonify(errno=RET.OK, errmsg="注册成功")
+
+
+
+
+
+
