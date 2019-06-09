@@ -166,3 +166,12 @@ def login():
     session["user_id"] = user.id
 
     return jsonify(errno=RET.OK, errmsg="登陆成功")
+
+
+
+@passport_blu.route("/logout")
+def logout():
+    """退出功能:直接删除session"""
+    session.pop("user_id", None)
+    return jsonify(errno=RET.OK, errmsg="退出成功")
+

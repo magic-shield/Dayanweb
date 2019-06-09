@@ -104,7 +104,7 @@ $(function () {
         $(this).find('a')[0].click()
     })
 
-    // TODO 登录表单提交
+    // 登录表单提交
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
         var mobile = $(".login_form #mobile").val()
@@ -357,4 +357,15 @@ function generateUUID() {
         return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
     return uuid;
+}
+
+
+
+function logout() {
+    // 退出
+    $.get("/passport/logout", function (response) {
+        if (response.errno == 0){
+            location.reload()
+        }
+    })
 }
