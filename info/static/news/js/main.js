@@ -182,7 +182,77 @@ function sendSMSCode() {
         return;
     }
 
-    // TODO 发送短信验证码
+
+
+
+
+
+
+
+
+
+
+    // 发送短信验证码
+    var params = {
+        "mobile": mobile,
+        "image_code": imageCode,
+        "image_code_id": imageCodeId
+    };
+    $.ajax({
+        url: "/passport/sms_code",
+        type: "post",
+        contentType: "application/json",
+        data: JSON.stringify(params),
+        success:function (response) {
+            if (response.errno == "0"){
+                // 发送短信成功
+
+                // 设置定时器
+                var num = 60;
+                var t = setInterval(function () {
+                    if (num == 1){
+                        clearInterval(t);
+                        // 设置显示内容
+                        $(".get_code").html("点击获取验证码");
+                        // 添加点击事件
+                        $(".get_code").attr("onclick", "sendSMSCode();");
+                    }else{
+                        num -= 1
+                        // 设置a标签显示的内容
+                        $(".get_code").html(num + "秒")
+                    }
+                }, 1000)
+
+            }else{
+                // 发送短信失败
+
+                // 弹出错误信息
+                alert(response.errmsg);
+                // 更改错误提示内容,并显示
+                $("#register-sms-code-err").html(response.errmsg).show();
+                // 恢复点击事件
+                $(".get_code").attr("onclick", "sendSMSCode();");
+
+            }
+        }
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 // 调用该函数模拟点击左侧按钮

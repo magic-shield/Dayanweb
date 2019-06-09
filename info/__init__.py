@@ -40,10 +40,12 @@ def create_app(config_name):
 
     global redis_store
     # Integrated redis
-    redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
+    redis_store = StrictRedis(host=config[config_name].REDIS_HOST,
+                              port=config[config_name].REDIS_PORT,
+                              decode_responses=True)
 
     # Integrated CSRFProtect
-    CSRFProtect(app)
+    # CSRFProtect(app)
 
     # Integrated flask-session
     Session(app)

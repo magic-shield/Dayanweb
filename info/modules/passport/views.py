@@ -83,12 +83,13 @@ def get_sms_code():
 
     sms_code_str = "%06d" % random.randint(0, 999999)
 
-    # current_app.logger.info("短信验证码为" + sms_code_str)  # TEST
+    current_app.logger.info("短信验证码为" + sms_code_str)  # TEST
 
     # Call yuntongxun to send sms verification code
-    result = CCP().send_template_sms('mobile', [sms_code_str, 5], 1)
-    if result != 0:
-        return jsonify(errno=RET.THIRDERR, errmsg="短信验证码发送失败")
+    # result = CCP().send_template_sms('mobile', [sms_code_str, 5], 1)
+    # if result != 0:
+    #     return jsonify(errno=RET.THIRDERR, errmsg="短信验证码发送失败")
+
 
     # Save sms verification code to Redis
     try:
