@@ -94,7 +94,7 @@ def news_collect():
         return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
 
     if not news:
-        return jsonify(errno=RET.NODATA., errmsg="没有这条新闻")
+        return jsonify(errno=RET.NODATA, errmsg="没有这条新闻")
 
     if action == "collect":
         if news not in user.collection_news:
