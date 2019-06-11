@@ -37,6 +37,7 @@ def detail(news_id):
     if not news:
         abort(404)
 
+    # --点击量设置--
     news.clicks += 1
     try:
         db.session.commit()
@@ -45,9 +46,15 @@ def detail(news_id):
         db.session.rollback()
         return jsonify(errno=RET.DBERR, errmsg="数据库存储失败")
 
+    # --收藏和取消收藏标签显示--
+    is_collected = False
+    if user and (news in user.collection_news):
+        is_collected = True
+
     data = {
         "user_info": user.to_dict() if user else None,
         "clicks_news_li": clicks_news_li,
-        "news": news.to_dict()
+        "news": news.to_dict(),
+        "is_collected": is_collected
     }
     return render_template("news/detail.html", data=data)
