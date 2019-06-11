@@ -1,21 +1,16 @@
-from flask import render_template, current_app, session, request, jsonify
+from flask import render_template, current_app, session, request, jsonify, g
 
 from info import constants
 from info.models import User, News, Category
 from info.modules.index import index_blu
+from info.utils.common import user_login
 from info.utils.response_code import RET
 
 
 @index_blu.route('/')
+@user_login
 def index():
-    user_id = session.get("user_id")
-
-    user = None
-    if user_id:
-        try:
-            user = User.query.get(user_id)
-        except Exception as e:
-            current_app.logger(e)
+    user = g.user
 
     # --显示新闻点击排行--
     clicks_news = list()
