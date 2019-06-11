@@ -85,8 +85,8 @@ def get_news_list():
         return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
 
     news_list = paginate.items
-    current_page = paginate.pages
-    total_page = paginate.page
+    current_page = paginate.page
+    total_page = paginate.pages
 
     news_dict_li = [news.to_dict() for news in news_list]
 
