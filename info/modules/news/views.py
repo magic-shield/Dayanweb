@@ -27,8 +27,19 @@ def detail(news_id):
 
     clicks_news_li = [news.to_dict() for news in clicks_news]
 
+    # --显示具体的新闻内容--
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+
+    if not news:
+        abort(404)
+
     data = {
         "user_info": user.to_dict() if user else None,
-        "clicks_news_li": clicks_news_li
+        "clicks_news_li": clicks_news_li,
+        "news": news.to_dict()
     }
     return render_template("news/detail.html", data=data)
