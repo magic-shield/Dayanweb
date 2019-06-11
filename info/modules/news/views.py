@@ -1,6 +1,6 @@
 from flask import render_template, g, current_app, abort, jsonify
 
-from info import constants
+from info import constants, db
 from info.models import News
 from info.modules.news import news_blu
 from info.utils.common import user_login
@@ -36,6 +36,14 @@ def detail(news_id):
 
     if not news:
         abort(404)
+
+    news.clicks += 1
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR, errmsg="数据库存储失败")
 
     data = {
         "user_info": user.to_dict() if user else None,
