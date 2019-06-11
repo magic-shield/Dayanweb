@@ -99,9 +99,18 @@ def news_collect():
     if action == "collect":
         if news not in user.collection_news:
             user.collection_news.append(news)
-
+            try:
+                db.session.commit()
+            except Exception as e:
+                current_app.logger.error(e)
+                return jsonify(errno=RET.DBERR, errmsg="数据库保存错误")
     else:
         if news in user.collection_news:
             user.collection_news.remove(news)
+            try:
+                db.session.commit()
+            except Exception as e:
+                current_app.logger.error(e)
+                return jsonify(errno=RET.DBERR, errmsg="数据库保存错误")
 
     return jsonify(errno=RET.OK, errmsg="OK")
