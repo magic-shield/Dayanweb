@@ -1,4 +1,4 @@
-from flask import render_template, g, current_app, abort, jsonify
+from flask import render_template, g, current_app, abort, jsonify, request
 
 from info import constants, db
 from info.models import News
@@ -58,3 +58,50 @@ def detail(news_id):
         "is_collected": is_collected
     }
     return render_template("news/detail.html", data=data)
+
+
+@news_blu.route("/news_collect", methods=["POST"])
+@user_login
+def news_collect():
+    """
+    新闻收藏和取消收藏功能
+    :return:
+    """
+    user = g.user
+
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="用户不存在")
+
+    news_id = request.json.get("news_id")
+    action = request.json.get("action")
+
+    if not all([news_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        news_id = int(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数格式不正确")
+
+    if action not in ["collect", "cancel_collect"]:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+
+    if not news:
+        return jsonify(errno=RET.NODATA., errmsg="没有这条新闻")
+
+    if action == "collect":
+        if news not in user.collection_news:
+            user.collection_news.append(news)
+
+    else:
+        if news in user.collection_news:
+            user.collection_news.remove(news)
+
+    return jsonify(errno=RET.OK, errmsg="OK")
