@@ -54,7 +54,9 @@
         {% block contentBlock %}
 
         {% endblock %}
-        <div class="rank_con fr">
+
+        {% block rankBlock %}
+            <div class="rank_con fr">
             {% block authorBlock %}
 
             {% endblock %}
@@ -77,6 +79,8 @@
 {#                <li><span>6</span><a href="#">人民日报：部分城市楼市放松限制引关注，楼市调控不会“拉抽屉”</a></li>#}
             </ul>
         </div>
+        {% endblock %}
+
     </div>
     <div class="footer">
         <div class="footer_links">
