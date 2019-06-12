@@ -127,6 +127,7 @@ $(function(){
                     $('.comment_sub').blur();
                     // 清空输入框内容
                     $(".comment_input").val("")
+                    updatecommentcount()
                 }else {
                     alert(resp.errmsg)
                 }
@@ -222,6 +223,7 @@ $(function(){
                         $this.prev().val('')
                         // 关闭
                         $this.parent().hide()
+                        updatecommentcount()
                         location.reload()
                     }else {
                         alert(resp.errmsg)
@@ -241,3 +243,11 @@ $(function(){
 
     })
 })
+
+function updatecommentcount() {
+    // 获取评论条数
+    var num = $(".comment_list").length
+
+    // 替换html的内容
+    $(".comment_count").html(num + "条评论")
+}
