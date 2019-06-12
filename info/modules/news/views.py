@@ -1,7 +1,7 @@
 from flask import render_template, g, current_app, abort, jsonify, request
 
 from info import constants, db
-from info.models import News, Comment
+from info.models import News, Comment, CommentLike
 from info.modules.news import news_blu
 from info.utils.common import user_login
 from info.utils.response_code import RET
@@ -179,3 +179,67 @@ def news_comment():
         return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
 
     return jsonify(errno=RET.OK, errmsg="OK", data=comment.to_dict())
+
+
+@news_blu.route("/comment_like", methods=["POST"])
+@user_login
+def get_comment_like():
+    """
+    评论点赞功能
+    :return:
+    """
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
+
+    comment_id = request.json.get("comment_id")
+    action = request.json.get("action")
+
+    if not all([comment_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    if action not in ["add", "remove"]:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        comment_id = int(comment_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数格式不正确")
+
+    try:
+        comment_obj = Comment.query.get(comment_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+
+    if not comment_obj:
+        return jsonify(errno=RET.NODATA, errmsg="没有这条评论")
+
+    try:
+        comment_like = CommentLike.query.filter(CommentLike.comment_id == comment_id,
+                                                CommentLike.user_id == user.id).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+
+    if action == "add":
+        if not comment_like:
+            comment_like_obj = CommentLike()
+            comment_like_obj.comment_id = comment_id
+            comment_like_obj.user_id = user.id
+            db.session.add(comment_like_obj)
+            comment_obj.like_count += 1
+    else:
+        if comment_like:
+            db.session.delete(comment_like)
+            comment_obj.like_count -= 1
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
+
+    return jsonify(errno=RET.OK, errmsg="OK")
