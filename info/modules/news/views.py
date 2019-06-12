@@ -1,7 +1,7 @@
 from flask import render_template, g, current_app, abort, jsonify, request
 
 from info import constants, db
-from info.models import News
+from info.models import News, Comment
 from info.modules.news import news_blu
 from info.utils.common import user_login
 from info.utils.response_code import RET
@@ -114,3 +114,57 @@ def news_collect():
                 return jsonify(errno=RET.DBERR, errmsg="数据库保存错误")
 
     return jsonify(errno=RET.OK, errmsg="OK")
+
+
+@news_blu.route("/news_comment", methods=["POST"])
+@user_login
+def news_comment():
+    """
+    新闻评论功能
+    :return:
+    """
+
+    user = g.user
+
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
+
+    news_id = request.json.get("news_id")
+    comment_str = request.json.get("comment")
+    parent_id = request.json.get("parent_id")
+
+    if not all([news_id, comment_str]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    try:
+        news_id = int(news_id)
+        if parent_id:
+            parent_id = int(parent_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数格式不正确")
+
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库查询错误")
+
+    if not news:
+        return jsonify(errno=RET.NODATA, errmsg="没有这条新闻")
+
+    # 初始化模型对象, 并往数据库添加一条评论
+    comment = Comment()
+    comment.news_id = news_id
+    comment.user_id = user.id
+    comment.content = comment_str
+    if parent_id:
+        comment.parent_id = parent_id
+    try:
+        db.session.add(comment)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
+
+    return jsonify(errno=RET.OK, errmsg="OK", data=comment.to_dict())
