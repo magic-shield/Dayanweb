@@ -20,4 +20,5 @@ def user_info():
         "user_info": user.to_dict()
     }
 
+
     return render_template("news/user.html", data=data)
