@@ -255,7 +255,7 @@ $(function(){
 
                         comment_html += '<a href="javascript:;" class="comment_up fr" data-commentid="' + comment.id + '" data-nid="' + comment.news_id + '" data-likecount="' + comment.like_count + '">赞</a>'
                         comment_html += '<a href="javascript:;" class="comment_reply fr">回复</a>'
-                        comment_html += '<form class="reply_form fl" data-commentid="' + comment.id + '" data-nid="' + news_id + '">'
+                        comment_html += '<form class="reply_form fl" data-commentid="' + comment.id + '" data-newsid="' + news_id + '">'
                         comment_html += '<textarea class="reply_input"></textarea>'
                         comment_html += '<input type="button" value="回复" class="reply_sub fr">'
                         comment_html += '<input type="reset" name="" value="取消" class="reply_cancel fr">'
@@ -267,7 +267,6 @@ $(function(){
                         // 关闭
                         $this.parent().hide()
                         updatecommentcount()
-                        location.reload()
                     }else {
                         alert(resp.errmsg)
                     }
