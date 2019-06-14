@@ -20,5 +20,20 @@ def user_info():
         "user_info": user.to_dict()
     }
 
-
     return render_template("news/user.html", data=data)
+
+
+@profile_blu.route("/user_base_info")
+@user_login
+def user_base_info():
+    """
+    个人中心基本资料
+    :return:
+    """
+    user = g.user
+
+    data = {
+        "user_info": user.to_dict()
+    }
+
+    return render_template("news/user_base_info.html", data=data)
