@@ -105,3 +105,40 @@ def user_pic_info():
         return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
 
     return jsonify(errno=RET.OK, errmsg="上传头像成功", data=constants.QINIU_DOMIN_PREFIX + key)
+
+
+@profile_blu.route("/user_pass_info", methods=["GET", "POST"])
+@user_login
+def user_pass_info():
+    """
+    用户密码修改
+    :return:
+    """
+    user = g.user
+
+    if request.method == "GET":
+        return render_template("news/user_pass_info.html")
+
+    old_password = request.json.get("old_password")
+    new_password = request.json.get("new_password")
+
+    if not all([old_password, new_password]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    if not user.check_passowrd(old_password):
+        return jsonify(errno=RET.PWDERR, errmsg="原密码输入错误")
+
+    try:
+        user.password = new_password
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
+
+    return jsonify(errno=RET.OK, errmsg="保存成功")
