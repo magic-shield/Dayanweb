@@ -25,7 +25,7 @@ def user_info():
     return render_template("news/user.html", data=data)
 
 
-@profile_blu.route("/user_base_info")
+@profile_blu.route("/user_base_info", methods=["POST", "GET"])
 @user_login
 def user_base_info():
     """
