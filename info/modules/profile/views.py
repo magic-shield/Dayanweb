@@ -63,3 +63,19 @@ def user_base_info():
         return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
 
     return jsonify(errno=RET.OK, errmsg="修改成功")
+
+
+@profile_blu.route("/user_pic_info", methods=["GET", "POST"])
+@user_login
+def user_pic_info():
+    """
+    用户头像设置
+    :return:
+    """
+    user = g.user
+
+    data = {
+        "user_info": user.to_dict()
+    }
+
+    return render_template("news/user_pic_info.html", data=data)
