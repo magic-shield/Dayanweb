@@ -2,7 +2,7 @@ from flask import g, redirect, render_template, request, jsonify, current_app
 
 from info import db, constants
 from info.libs.image_storage import storage
-from info.models import Category
+from info.models import Category, News
 from info.utils.common import user_login
 from info.utils.response_code import RET
 from . import profile_blu
@@ -185,20 +185,64 @@ def user_collection():
     return render_template('news/user_collection.html', data=data)
 
 
-@profile_blu.route("/user_news_release")
+@profile_blu.route("/user_news_release", methods=["POST", "GET"])
 @user_login
 def user_news_release():
     """
     发布新闻
     :return:
     """
-    categorys = Category.query.all()
+    user = g.user
+    if request.method == "GET":
+        categorys = Category.query.all()
 
-    categorys_dict_li = [category.to_dict() for category in categorys]
+        categorys_dict_li = [category.to_dict() for category in categorys]
 
-    categorys_dict_li.pop(0)
+        categorys_dict_li.pop(0)
 
-    data = {
-        "categorys_dict_li": categorys_dict_li
-    }
-    return render_template("news/user_news_release.html", data=data)
+        data = {
+            "categorys_dict_li": categorys_dict_li
+        }
+        return render_template("news/user_news_release.html", data=data)
+
+    title = request.form.get("title")
+    category_id = request.form.get("category_id")
+    digest = request.form.get("digest")
+    index_image = request.files.get("index_image")
+    content = request.form.get("content")
+
+    if not all([title, category_id, digest, index_image, content]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        category_id = int(category_id)
+        image_data = index_image.read()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数格式不正确")
+
+    try:
+        key = storage(image_data)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.THIRDERR, errmsg="第三方上传失败")
+
+    news = News()
+    news.title = title
+    news.source = "个人发布"
+    news.digest = digest
+    news.content = content
+    news.category_id = category_id
+    news.index_image_url = constants.QINIU_DOMIN_PREFIX + key
+    news.user_id = user.id
+    news.status = 1
+
+    try:
+        db.session.add(news)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
+
+    return jsonify(errno=RET.OK, errmsg="OK")

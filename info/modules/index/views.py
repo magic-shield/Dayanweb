@@ -69,7 +69,7 @@ def get_news_list():
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg="参数格式不正确")
 
-    filters = list()
+    filters = [News.status == 0]
     if cid != 1:
         filters.append(News.category_id == cid)
     try:
