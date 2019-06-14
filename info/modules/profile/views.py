@@ -2,6 +2,7 @@ from flask import g, redirect, render_template, request, jsonify, current_app
 
 from info import db, constants
 from info.libs.image_storage import storage
+from info.models import Category
 from info.utils.common import user_login
 from info.utils.response_code import RET
 from . import profile_blu
@@ -182,3 +183,22 @@ def user_collection():
     }
 
     return render_template('news/user_collection.html', data=data)
+
+
+@profile_blu.route("/user_news_release")
+@user_login
+def user_news_release():
+    """
+    发布新闻
+    :return:
+    """
+    categorys = Category.query.all()
+
+    categorys_dict_li = [category.to_dict() for category in categorys]
+
+    categorys_dict_li.pop(0)
+
+    data = {
+        "categorys_dict_li": categorys_dict_li
+    }
+    return render_template("news/user_news_release.html", data=data)
