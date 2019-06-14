@@ -142,3 +142,43 @@ def user_pass_info():
         return jsonify(errno=RET.DBERR, errmsg="数据库保存失败")
 
     return jsonify(errno=RET.OK, errmsg="保存成功")
+
+
+@profile_blu.route("/user_collection")
+@user_login
+def user_collection():
+    """
+    我的收藏
+    :return:
+    """
+    user = g.user
+    page = request.args.get("page", 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    news_list = []
+    total_page = 1
+    current_page = 1
+    try:
+        paginate = user.collection_news.paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
+        current_page = paginate.page
+        total_page = paginate.pages
+        news_list = paginate.items
+    except Exception as e:
+        current_app.logger.error(e)
+
+    news_dict_li = []
+    for news in news_list:
+        news_dict_li.append(news.to_basic_dict())
+
+    data = {
+        "total_page": total_page,
+        "current_page": current_page,
+        "news_dict_li": news_dict_li
+    }
+
+    return render_template('news/user_collection.html', data=data)
