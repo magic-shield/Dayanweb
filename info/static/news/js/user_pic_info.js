@@ -15,7 +15,7 @@ $(function () {
             },
             success: function (resp) {
                 if (resp.errno == "0") {
-                    $(".now_user_pic").attr("src", resp.data.avatar_url)
+                    $(".now_user_pic").attr("src", resp.data)
                     $(".usercenter_pic>img", parent.document).attr("src", resp.data)
                     $(".user_login>img", parent.document).attr("src", resp.data)
                 } else {
