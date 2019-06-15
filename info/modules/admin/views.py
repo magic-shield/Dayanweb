@@ -1,5 +1,6 @@
-from flask import render_template, request, current_app, session
+from flask import render_template, request, current_app, session, g, redirect, url_for
 
+from info import user_login
 from info.models import User
 from info.modules.admin import admin_blu
 
@@ -12,6 +13,11 @@ def login():
     """
 
     if request.method == "GET":
+        user_id = session.get("user_id")
+        is_admin = session.get("is_admin")
+        if user_id and is_admin:
+            return redirect(url_for("admin.index"))
+
         return render_template("admin/login.html")
 
     username = request.form.get("username")
@@ -35,4 +41,17 @@ def login():
     session["user_id"] = user.id
     session["is_admin"] = user.is_admin
 
-    return "登录成功，需要跳转到主页"
+    return redirect(url_for("admin.index"))
+
+
+@admin_blu.route("/index")
+@user_login
+def index():
+    """
+    后台管理首页
+    :return:
+    """
+    data = {
+        "user_info": g.user.to_dict()
+    }
+    return render_template("admin/index.html", data=data)
