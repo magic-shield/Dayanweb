@@ -65,14 +65,14 @@ def user_count():
     用户统计
     :return:
     """
-    # 总人数
+    # --总人数--
     total_count = 0
     try:
         total_count = User.query.filter(User.is_admin == 0).count()
     except Exception as e:
         current_app.logger.error(e)
 
-    # 月新增数, 先获取今天的时间对象, 制造时间字符串类似"2019-03-01"
+    # --月新增数, 先获取今天的时间对象, 制造时间字符串类似"2019-03-01"--
     month_count = 0
     t = datetime.datetime.now()
     month_date_str = "%d-%02d-01" % (t.year, t.month)
@@ -83,7 +83,7 @@ def user_count():
     except Exception as e:
         current_app.logger.error(e)
 
-    # 日新增数
+    # --日新增数--
     day_count = 0
     day_date_str = "%d-%02d-%02d" % (t.year, t.month, t.day)
     day_date = datetime.datetime.strptime(day_date_str, "%Y-%m-%d")
@@ -92,10 +92,28 @@ def user_count():
     except Exception as e:
         current_app.logger.error(e)
 
+    # --用户月活跃数--
+    activate_date = []
+    activate_count = []
+    for i in range(0, 31):
+        start_date = day_date - datetime.timedelta(days=i - 0)
+        end_date = day_date - datetime.timedelta(days=i - 1)
+        count = User.query.filter(User.is_admin == 0,
+                                  User.last_login >= start_date,
+                                  User.last_login < end_date).count()
+        start_date_str = start_date.strftime("%Y-%m-%d")
+        activate_date.append(start_date_str)
+        activate_count.append(count)
+
+    activate_count.reverse()
+    activate_date.reverse()
+
     data = {
         "total_count": total_count,
         "month_count": month_count,
         "day_count": day_count,
+        "activate_count": activate_count,
+        "activate_date": activate_date
     }
 
     return render_template("admin/user_count.html", data=data)
