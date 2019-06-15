@@ -55,3 +55,13 @@ def index():
         "user_info": g.user.to_dict()
     }
     return render_template("admin/index.html", data=data)
+
+
+@admin_blu.route("/user_count")
+def user_count():
+    """
+    用户统计
+    :return:
+    """
+    return render_template("admin/user_count.html")
+
