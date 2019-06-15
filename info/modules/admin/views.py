@@ -2,7 +2,7 @@ import datetime
 
 from flask import render_template, request, current_app, session, g, redirect, url_for, jsonify, abort
 
-from info import user_login, constants
+from info import user_login, constants, db
 from info.libs.image_storage import storage
 from info.models import User, News, Category
 from info.modules.admin import admin_blu
@@ -407,5 +407,63 @@ def news_edit_detail():
     news.digest = digest
     news.content = content
     news.category_id = category_id
+
+    return jsonify(errno=RET.OK, errmsg="OK")
+
+
+@admin_blu.route('/news_type', methods=["GET", "POST"])
+def news_type():
+    """
+    新闻分类管理
+    :return:
+    """
+    if request.method == "GET":
+
+        try:
+            categories = Category.query.all()
+        except Exception as e:
+            current_app.logger.error(e)
+            return render_template('admin/news_type.html', errmsg="查询数据错误")
+
+        category_dict_li = []
+        for category in categories:
+            # 取到分类的字典
+            cate_dict = category.to_dict()
+            category_dict_li.append(cate_dict)
+
+        # 移除最新的分类
+        category_dict_li.pop(0)
+
+        data = {
+            "categories": category_dict_li
+        }
+
+        return render_template('admin/news_type.html', data=data)
+
+    # 新增或者添加分类
+    # 1. 取参数
+    cname = request.json.get("name")
+    # 如果传了cid，代表是编辑已存在的分类
+    cid = request.json.get("id")
+
+    if not cname:
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    if cid:
+        # 有 分类 id 代表查询相关数据
+        try:
+            cid = int(cid)
+            category = Category.query.get(cid)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+        if not category:
+            return jsonify(errno=RET.NODATA, errmsg="未查询到分类数据")
+        category.name = cname
+    else:
+        category = Category()
+        category.name = cname
+        db.session.add(category)
 
     return jsonify(errno=RET.OK, errmsg="OK")
