@@ -18,6 +18,7 @@ class Config(object):
     SESSION_USE_SIGNER = True
     SESSION_PERMANENT = False
     PERMANENT_SESSION_LIFETIME = 86400 * 2
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
 
 class DevelopConfig(Config):
