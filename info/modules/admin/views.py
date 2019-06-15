@@ -166,6 +166,7 @@ def news_review():
     :return:
     """
     page = request.args.get("p", 1)
+    keywords = request.args.get("keywords")
 
     try:
         page = int(page)
@@ -177,8 +178,13 @@ def news_review():
     current_page = 1
     total_page = 1
 
+    # 添加关键字查询条件
+    filters = [News.status != 0]
+    if keywords:
+        filters.append(News.title.contains(keywords))
+
     try:
-        paginate = News.query.filter(News.status != 0) \
+        paginate = News.query.filter(*filters) \
             .order_by(News.create_time.desc()) \
             .paginate(page, constants.ADMIN_NEWS_PAGE_MAX_COUNT, False)
 
