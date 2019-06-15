@@ -1,3 +1,5 @@
+import datetime
+
 from flask import render_template, request, current_app, session, g, redirect, url_for
 
 from info import user_login
@@ -63,5 +65,37 @@ def user_count():
     用户统计
     :return:
     """
-    return render_template("admin/user_count.html")
+    # 总人数
+    total_count = 0
+    try:
+        total_count = User.query.filter(User.is_admin == 0).count()
+    except Exception as e:
+        current_app.logger.error(e)
 
+    # 月新增数, 先获取今天的时间对象, 制造时间字符串类似"2019-03-01"
+    month_count = 0
+    t = datetime.datetime.now()
+    month_date_str = "%d-%02d-01" % (t.year, t.month)
+    # 将字符串转成datetime对象
+    month_date = datetime.datetime.strptime(month_date_str, "%Y-%m-%d")
+    try:
+        month_count = User.query.filter(User.is_admin == 0, User.create_time > month_date).count()
+    except Exception as e:
+        current_app.logger.error(e)
+
+    # 日新增数
+    day_count = 0
+    day_date_str = "%d-%02d-%02d" % (t.year, t.month, t.day)
+    day_date = datetime.datetime.strptime(day_date_str, "%Y-%m-%d")
+    try:
+        day_count = User.query.filter(User.is_admin == False, User.create_time > day_date).count()
+    except Exception as e:
+        current_app.logger.error(e)
+
+    data = {
+        "total_count": total_count,
+        "month_count": month_count,
+        "day_count": day_count,
+    }
+
+    return render_template("admin/user_count.html", data=data)
