@@ -101,8 +101,8 @@
             <div class="author_resume">签名：{{ data.news.author.signature }}</div>
             <div class="writings"><span>总篇数</span><b>{{ data.news.author.news_count }}</b></div>
             <div class="follows"><span>粉丝</span><b>{{ data.news.author.followers_count }}</b></div>
-            <a href="javascript:;" class="focus fr" data-userid="{{ data.news.author.id }}">关注</a>
-            <a href="javascript:;" class="focused fr" data-userid="{{ data.news.author.id }}"><span class="out">已关注</span><span class="over">取消关注</span></a>
+            <a href="javascript:;" class="focus fr" data-userid="{{ data.news.author.id }}" style="display: {% if data.is_followed %}none{% else %}block{% endif %}">关注</a>
+            <a href="javascript:;" class="focused fr" data-userid="{{ data.news.author.id }}" style="display: {% if data.is_followed %}block{% else %}none{% endif %}"><span class="out">已关注</span><span class="over">取消关注</span></a>
         </div>
     {% endif %}
 {% endblock %}

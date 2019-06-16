@@ -51,6 +51,14 @@ def detail(news_id):
     if user and (news in user.collection_news):
         is_collected = True
 
+    # --关注按钮显示--
+    is_followed = False
+    author = news.user
+    if user and author:
+        # 如果用户在作者的粉丝列表中
+        if user in author.followers:
+            is_followed = True
+
     # --显示新闻评论--
     comments = []
     try:
@@ -85,7 +93,8 @@ def detail(news_id):
         "clicks_news_li": clicks_news_li,
         "news": news.to_dict(),
         "is_collected": is_collected,
-        "comments_dict_li": comments_dict_li
+        "comments_dict_li": comments_dict_li,
+        "is_followed": is_followed
     }
     return render_template("news/detail.html", data=data)
 
